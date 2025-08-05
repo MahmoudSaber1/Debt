@@ -1,9 +1,8 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 // Add wasm asset support
 config.resolver.assetExts.push("wasm");
@@ -17,4 +16,4 @@ config.server.enhanceMiddleware = (middleware) => {
     };
 };
 
-module.exports = withNativeWind(config, { input: "./app/global.css" });;
+module.exports = withNativeWind(config, { input: "./app/global.css" });
