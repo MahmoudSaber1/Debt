@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 
 const TabIcon = ({ focused, icon, title }: { focused: boolean; icon: "linechart" | "solution1"; title: string }) => (
     <View className="flex-1 flex flex-col items-center">
-        <AntDesign name={`${icon}`} color={focused ? "#00c950" : "#666876"} size={20} />
+        <AntDesign name={`${icon}`} color={focused ? "#fea726" : "#666876"} size={20} />
         <Text className={`${focused ? "text-primary-300 font-rubik-medium" : "text-black-200 font-rubik"} text-xs w-full text-center mt-1`}>{title}</Text>
     </View>
 );
