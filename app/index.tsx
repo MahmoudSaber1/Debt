@@ -6,9 +6,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CircleAnimation } from "@/components/circle-animation";
 import { useAuthStore } from "@/store";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
 
 export default function Index() {
-    const { setBiometricType, setIsAuthenticated } = useAuthStore();
+    const { isAuthenticated, setBiometricType, setIsAuthenticated } = useAuthStore();
+    const redirect = useRouter();
 
     // فحص دعم البصمة على الجهاز
     const checkBiometricSupport = useCallback(async () => {
@@ -43,7 +45,7 @@ export default function Index() {
     }, [setBiometricType]);
 
     // تشغيل مصادقة البصمة
-    const authenticateUser = async () => {
+    const authenticateUser = useCallback(async () => {
         try {
             const result = await LocalAuthentication.authenticateAsync({
                 promptMessage: "ضع إصبعك على مستشعر البصمة",
@@ -54,7 +56,7 @@ export default function Index() {
 
             if (result.success) {
                 setIsAuthenticated(true);
-                Alert.alert("نجح!", "تم التحقق من البصمة بنجاح");
+                redirect.push("/(root)/(tabs)"); // إعادة التوجيه إلى الصفحة الرئيسية عند النجاح
             } else {
                 setIsAuthenticated(false);
 
@@ -75,11 +77,16 @@ export default function Index() {
             console.error("خطأ في المصادقة:", error);
             Alert.alert("خطأ", "حدث خطأ غير متوقع");
         }
-    };
+    }, [setIsAuthenticated, redirect]);
 
     useEffect(() => {
-        checkBiometricSupport();
-    }, [checkBiometricSupport]);
+        if (isAuthenticated) {
+            redirect.push("/(root)/(tabs)"); // إعادة التوجيه إلى الصفحة الرئيسية إذا كان المستخدم مصادقًا بالفعل
+        } else {
+            checkBiometricSupport();
+            authenticateUser();
+        }
+    }, [checkBiometricSupport, authenticateUser, isAuthenticated, redirect]);
 
     return (
         <SafeAreaView className="h-full bg-white">

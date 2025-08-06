@@ -24,19 +24,19 @@ const TabsLayout = () => {
             }}
         >
             <Tabs.Screen
-                name="index"
-                options={{
-                    title: "الأحصائيات",
-                    headerShown: false,
-                    tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={"linechart"} title="الأحصائيات" />,
-                }}
-            />
-            <Tabs.Screen
                 name="debts"
                 options={{
                     title: "القوائم",
                     headerShown: false,
                     tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={"solution1"} title="القوائم" />,
+                }}
+            />
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: "الأحصائيات",
+                    headerShown: false,
+                    tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={"linechart"} title="الأحصائيات" />,
                 }}
             />
         </Tabs>
