@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Widget, WidgetWithBar } from "@/components/widget";
+import { Widget, WidgetWithBarSpring } from "@/components/widget";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export default function Home() {
@@ -18,7 +18,7 @@ export default function Home() {
                     <Widget title="المبلغ المتبقي" count={"500"} icon={<FontAwesome6 name="arrow-trend-down" size={15} color="#fda4af" />} style="w-1/2" countStyle="text-rose-300" />
                     <Widget title="المبلغ المسدد" count={"1000"} icon={<FontAwesome6 name="arrow-trend-up" size={15} color="#6ee7b7" />} style="flex-1" countStyle="text-emerald-300" />
                 </View>
-                <WidgetWithBar title="تطور السداد (هذا العام)" totale={"5000"} count="1250" style="w-full" />
+                <WidgetWithBarSpring title="تطور السداد (هذا العام)" totale={"5000"} count="1250" style="w-full" />
             </View>
         </SafeAreaView>
     );
