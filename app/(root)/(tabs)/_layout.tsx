@@ -26,9 +26,9 @@ const TabsLayout = () => {
             <Tabs.Screen
                 name="debts"
                 options={{
-                    title: "القوائم",
+                    title: "الديون",
                     headerShown: false,
-                    tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={"solution1"} title="القوائم" />,
+                    tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={"solution1"} title="الديون" />,
                 }}
             />
             <Tabs.Screen
