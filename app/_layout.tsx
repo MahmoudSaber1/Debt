@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
+import DatabaseManager from "@/database/database";
 import * as Sentry from "@sentry/react-native";
 import "./global.css";
 
@@ -38,6 +39,7 @@ export default Sentry.wrap(function RootLayout() {
         if (fontsLoaded || fontError) {
             SplashScreen.hideAsync();
         }
+        DatabaseManager.init();
     }, [fontsLoaded, fontError]);
 
     if (!fontsLoaded && !fontError) {

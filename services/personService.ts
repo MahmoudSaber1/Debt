@@ -14,7 +14,14 @@ export class PersonService {
                 GROUP BY p.id
                 ORDER BY p.created_at DESC
             `);
-            return result;
+            // تحويل البيانات إلى الشكل المطلوب
+            const formattedResult = result.map((person: any) => ({
+                id: person.id,
+                name: person.name,
+                totalAmount: person.total_amount,
+                remainingAmount: person.remaining_amount,
+            }));
+            return formattedResult;
         } catch (error) {
             console.error("Error fetching people:", error);
             throw error;
@@ -110,16 +117,16 @@ export class PersonService {
         const db = DatabaseManager.getDb();
         try {
             const result = await db.getFirstAsync(`
-            SELECT 
-            COUNT(*) as total_people,
-            COUNT(CASE WHEN status = 'active' THEN 1 END) as active_count,
-            COUNT(CASE WHEN status = 'paid' THEN 1 END) as paid_count,
-            COUNT(CASE WHEN status = 'overdue' THEN 1 END) as overdue_count,
-            COALESCE(SUM(total_amount), 0) as total_debt,
-            COALESCE(SUM(remaining_amount), 0) as total_remaining,
-            COALESCE(SUM(total_amount - remaining_amount), 0) as total_paid
-            FROM people
-        `);
+                SELECT 
+                COUNT(*) as total_people,
+                COUNT(CASE WHEN status = 'active' THEN 1 END) as active_count,
+                COUNT(CASE WHEN status = 'paid' THEN 1 END) as paid_count,
+                COUNT(CASE WHEN status = 'overdue' THEN 1 END) as overdue_count,
+                COALESCE(SUM(total_amount), 0) as total_debt,
+                COALESCE(SUM(remaining_amount), 0) as total_remaining,
+                COALESCE(SUM(total_amount - remaining_amount), 0) as total_paid
+                FROM people
+            `);
             return result;
         } catch (error) {
             console.error("Error fetching statistics:", error);

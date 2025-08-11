@@ -67,7 +67,7 @@ export const WidgetWithBarSpring = ({ title, count, totale, style, countStyle }:
 };
 
 export const ProgressBar = ({ count, totale }: { count: string; totale: string }) => {
-    const progress = (parseFloat(count) / parseFloat(totale || "1")) * 100;
+    const progress = ((parseFloat(count) - parseFloat(totale || "1")) / parseFloat(totale || "1")) * 100;
 
     const progressWidth = useSharedValue(0);
     const bounceScale = useSharedValue(1);

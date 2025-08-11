@@ -1,17 +1,39 @@
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Text, TextInput, ToastAndroid, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AddBtn } from "@/components/buttons";
+import { PersonService } from "@/services/personService";
 
 export default function AddDebt() {
     const [data, setData] = useState({
         name: "",
         amount: "",
-        date: new Date(),
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleAddDebt = async () => {
+        setIsLoading(true);
+        try {
+            const newDebt = {
+                name: data.name,
+                totalAmount: parseFloat(data.amount),
+                remainingAmount: 0,
+                description: "",
+                status: "active",
+            };
+            await PersonService.addPerson(newDebt).then(() => {
+                ToastAndroid.show("تمت إضافة الدين بنجاح", ToastAndroid.SHORT);
+                router.back();
+            });
+        } catch (error) {
+            console.error("Error adding debt:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 px-4 relative">
@@ -32,7 +54,7 @@ export default function AddDebt() {
                 </View>
             </View>
 
-            <AddBtn onPress={() => {}} title="إضافة الشخص" />
+            <AddBtn onPress={() => handleAddDebt()} isLoading={isLoading} title="إضافة الشخص" />
         </SafeAreaView>
     );
 }

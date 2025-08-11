@@ -1,13 +1,23 @@
 import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { personData } from "@/assets/data";
 import { DebtCard } from "@/components/cards/debt-card";
+import { PersonService } from "@/services/personService";
 
 export default function Debts() {
     const route = useRouter();
+    const [debts, setDebts] = useState<PersonProps[]>([]);
+
+    useEffect(() => {
+        const fetchDebts = async () => {
+            const fetchedDebts = await PersonService.getAllPeople();
+            setDebts(fetchedDebts);
+        };
+        fetchDebts();
+    }, []);
 
     return (
         <SafeAreaView className="flex-1 px-4 relative">
@@ -19,7 +29,7 @@ export default function Debts() {
                 <Entypo name="plus" size={30} color="white" />
             </TouchableOpacity>
 
-            <FlatList style={{ direction: "rtl" }} contentContainerClassName="pb-20 gap-5" data={personData} renderItem={({ item }) => <DebtCard data={item} />} keyExtractor={(item) => item.id.toString()} />
+            <FlatList style={{ direction: "rtl" }} contentContainerClassName="pb-20 gap-5" data={debts} renderItem={({ item }) => <DebtCard data={item} />} keyExtractor={(item) => item.id.toString()} />
         </SafeAreaView>
     );
 }
