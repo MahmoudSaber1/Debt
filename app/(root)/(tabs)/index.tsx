@@ -15,8 +15,8 @@ export default function Home() {
             <View className="flex-1 gap-4">
                 <Widget title="إجمالي الأشخاص" count={"10"} style="w-full" />
                 <View className="flex-row justify-between gap-4">
-                    <Widget title="المبلغ المتبقي" count={"500"} icon={<FontAwesome6 name="arrow-trend-down" size={15} color="#fda4af" />} style="w-1/2" countStyle="text-rose-300" />
-                    <Widget title="المبلغ المسدد" count={"1000"} icon={<FontAwesome6 name="arrow-trend-up" size={15} color="#6ee7b7" />} style="flex-1" countStyle="text-emerald-300" />
+                    <Widget title="المبلغ المتبقي" count={"5000"} icon={<FontAwesome6 name="arrow-trend-down" size={15} color="#fda4af" />} style="w-1/2" countStyle="text-rose-300" />
+                    <Widget title="المبلغ المسدد" count={"1250"} icon={<FontAwesome6 name="arrow-trend-up" size={15} color="#6ee7b7" />} style="flex-1" countStyle="text-emerald-300" />
                 </View>
                 <WidgetWithBarSpring title="تطور السداد (هذا العام)" totale={"5000"} count="1250" style="w-full" />
             </View>
