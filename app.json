@@ -61,14 +61,6 @@
                 {
                     "faceIDPermission": "Allow Debt to use Face ID."
                 }
-            ],
-            [
-                "@sentry/react-native/expo",
-                {
-                    "url": "https://sentry.io/",
-                    "project": "debt",
-                    "organization": "elmotech"
-                }
             ]
         ],
         "experiments": {
