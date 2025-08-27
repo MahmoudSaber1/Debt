@@ -5,6 +5,7 @@ interface PropsChildren {
 interface WidgetProps {
     title: string;
     count: string;
+    paid?: string;
     totale?: string;
     style?: string;
     countStyle?: string;
@@ -37,8 +38,11 @@ interface PersonProps {
     name: string;
     totalAmount: number;
     remainingAmount: number;
+    status: string;
     payments: PaymentProps[];
 }
 interface DebtCardProps {
     data: PersonProps;
+    onDelete: (id: number) => void;
+    loading: boolean;
 }

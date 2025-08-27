@@ -1,17 +1,41 @@
 import Feather from "@expo/vector-icons/Feather";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Alert, Text, TextInput, ToastAndroid, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AddBtn } from "@/components/buttons";
+import { PaymentService } from "@/services/paymentService";
 
 export default function AddPayment() {
     const { id } = useLocalSearchParams<{ id?: string }>();
+
     const [data, setData] = useState({
         amount: "",
         date: new Date(),
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleAddPayment = async () => {
+        setIsLoading(true);
+        try {
+            const newDebt = {
+                personId: id ? parseInt(id) : 0,
+                amount: parseFloat(data.amount),
+                paymentDate: data.date.toISOString(),
+                notes: "",
+            };
+            await PaymentService.addPayment(newDebt).then(() => {
+                ToastAndroid.show("تمت إضافة الدفعة بنجاح", ToastAndroid.SHORT);
+                router.back();
+            });
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "حدث خطأ أثناء إضافة الدفعة. يرجى المحاولة مرة أخرى.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 px-4 relative">
@@ -28,7 +52,7 @@ export default function AddPayment() {
                 </View>
             </View>
 
-            <AddBtn onPress={() => {}} title="إضافة دفعة جديدة" />
+            <AddBtn onPress={handleAddPayment} isLoading={isLoading} title="إضافة دفعة جديدة" />
         </SafeAreaView>
     );
 }

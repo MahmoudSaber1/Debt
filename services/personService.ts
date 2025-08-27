@@ -20,6 +20,7 @@ export class PersonService {
                 name: person.name,
                 totalAmount: person.total_amount,
                 remainingAmount: person.remaining_amount,
+                status: person.status,
             }));
             return formattedResult;
         } catch (error) {
@@ -32,8 +33,27 @@ export class PersonService {
     static async getPersonById(id: number) {
         const db = DatabaseManager.getDb();
         try {
-            const result = await db.getFirstAsync("SELECT * FROM people WHERE id = ?", [id]);
-            return result;
+            // get the person
+            const result = await db.getFirstAsync(
+                `
+                SELECT p.*, 
+                    COUNT(py.id) as payments_count,
+                    COALESCE(SUM(py.amount), 0) as total_paid
+                FROM people p
+                LEFT JOIN payments py ON p.id = py.person_id
+                WHERE p.id = ?
+                GROUP BY p.id
+            `,
+                [id]
+            );
+            const formattedResult = {
+                id: result.id,
+                name: result.name,
+                totalAmount: result.total_amount,
+                remainingAmount: result.remaining_amount,
+                status: result.status,
+            };
+            return formattedResult;
         } catch (error) {
             console.error("Error fetching person:", error);
             throw error;
@@ -127,7 +147,16 @@ export class PersonService {
                 COALESCE(SUM(total_amount - remaining_amount), 0) as total_paid
                 FROM people
             `);
-            return result;
+            const formattedResult = {
+                totalPeople: result.total_people,
+                activeCount: result.active_count,
+                paidCount: result.paid_count,
+                overdueCount: result.overdue_count,
+                totalDebt: result.total_debt,
+                totalRemaining: result.total_remaining,
+                totalPaid: result.total_paid,
+            };
+            return formattedResult;
         } catch (error) {
             console.error("Error fetching statistics:", error);
             throw error;

@@ -41,7 +41,11 @@ export const WidgetWithBar = ({ title, count, totale, style, countStyle }: Widge
 };
 
 // Alternative version with spring animation and bounce effect
-export const WidgetWithBarSpring = ({ title, count, totale, style, countStyle }: WidgetProps) => {
+export const WidgetWithBarSpring = ({ title, paid, count, totale, style, countStyle }: WidgetProps) => {
+    if (!totale) {
+        return null;
+    }
+
     return (
         <View className={`p-6 bg-white shadow-md rounded-lg flex items-end gap-5 ${style}`}>
             <Text className="text-lg text-gray-500 font-rubik-medium">{title}</Text>
@@ -53,12 +57,12 @@ export const WidgetWithBarSpring = ({ title, count, totale, style, countStyle }:
                         جنيه
                     </Text>
                     <Text className={`text-2xl font-rubik-bold ${countStyle}`}>
-                        <CountUp isCounting end={parseFloat(count)} duration={1.5} />
+                        <CountUp isCounting end={parseFloat(paid!)} duration={1.5} />
                         جنيه /
                     </Text>
                 </View>
 
-                <ProgressBar count={count} totale={totale!} />
+                <ProgressBar count={count.toString()} totale={totale!.toString()} />
             </View>
 
             <BarChart />
@@ -67,8 +71,7 @@ export const WidgetWithBarSpring = ({ title, count, totale, style, countStyle }:
 };
 
 export const ProgressBar = ({ count, totale }: { count: string; totale: string }) => {
-    const progress = ((parseFloat(count) - parseFloat(totale || "1")) / parseFloat(totale || "1")) * 100;
-
+    const progress = ((parseFloat(totale) - parseFloat(count)) / parseFloat(totale || "1")) * 100;
     const progressWidth = useSharedValue(0);
     const bounceScale = useSharedValue(1);
 

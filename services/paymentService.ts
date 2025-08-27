@@ -7,7 +7,13 @@ export class PaymentService {
         const db = DatabaseManager.getDb();
         try {
             const result = await db.getAllAsync("SELECT * FROM payments WHERE person_id = ? ORDER BY payment_date DESC", [personId]);
-            return result;
+            const formattedResult = result.map((payment: any) => ({
+                id: payment.id,
+                amount: payment.amount,
+                date: payment.payment_date,
+                notes: payment.notes,
+            }));
+            return formattedResult;
         } catch (error) {
             console.error("Error fetching payments:", error);
             throw error;
