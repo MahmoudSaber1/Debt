@@ -1,5 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Switch, Text, TextInput, ToastAndroid, View } from "react-native";
@@ -14,40 +14,40 @@ export default function EditDebt() {
 
     const [data, setData] = useState({
         name: "",
-        amount: "",
-        remainingAmount: "",
         totalAmount: "",
-        status: "active",
+        remainingAmount: "",
+        amount: "",
+        status: "",
     });
 
-    const mutationGetDebt = useMutation({
-        mutationFn: async () => {
+    const getDebt = useQuery({
+        queryKey: ["person", id],
+        queryFn: async () => {
             const debt = await PersonService.getPersonById(parseInt(id!));
+            setData({
+                name: debt.name,
+                remainingAmount: debt.remainingAmount.toString(),
+                totalAmount: debt.totalAmount.toString(),
+                amount: "",
+                status: debt.status,
+            });
             return debt;
         },
-        onSuccess: async (response) => {
-            setData({
-                name: response.name,
-                remainingAmount: response.remainingAmount.toString(),
-                totalAmount: response.totalAmount.toString(),
-                amount: "",
-                status: response.status,
-            });
-        },
     });
-    const { isPending } = mutationGetDebt;
+    const { isPending } = getDebt;
 
     const mutationEditDebt = useMutation({
         mutationFn: async () => {
             const updateTotal = parseFloat(data.totalAmount) + parseFloat(data.amount || "0");
             const updateRemaining = parseFloat(data.remainingAmount) + parseFloat(data.amount || "0");
+            const updateStatus = updateRemaining === 0 ? "paid" : "active";
 
             const newDebt = {
                 name: data.name,
                 totalAmount: updateTotal,
                 remainingAmount: updateRemaining,
                 description: "",
-                status: data.status,
+                status: updateStatus,
             };
             await PersonService.updatePerson(parseInt(id!), newDebt);
         },

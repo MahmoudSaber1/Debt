@@ -85,7 +85,7 @@ export default function DebtDetails() {
                 </View>
             </ScrollView>
 
-            <AddBtn onPress={() => router.push(`/add-payment/${id}`)} title="إضافة دفعة جديدة" />
+            {personData?.status === "paid" ? null : <AddBtn onPress={() => router.push(`/add-payment/${id}`)} title="إضافة دفعة جديدة" />}
         </SafeAreaView>
     );
 }
