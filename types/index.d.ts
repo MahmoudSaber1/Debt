@@ -43,6 +43,4 @@ interface PersonProps {
 }
 interface DebtCardProps {
     data: PersonProps;
-    onDelete: (id: number) => void;
-    loading: boolean;
 }

@@ -1,11 +1,11 @@
 import { Redirect, Slot } from "expo-router";
 
-import { useAuthStore } from "@/store";
+import { useAuth } from "@/lib/global-context";
 
 export default function RootLayout() {
-    const { isAuthenticated } = useAuthStore();
+    const { userToken } = useAuth();
 
-    if (!isAuthenticated) {
+    if (!userToken) {
         return <Redirect href={"/"} />;
     }
 

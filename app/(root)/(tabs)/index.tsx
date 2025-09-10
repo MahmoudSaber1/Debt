@@ -1,33 +1,33 @@
-import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Widget, WidgetWithBarSpring } from "@/components/widget";
 import { PersonService } from "@/services/personService";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
-    const [statistics, setStatistics] = useState<any>(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    const getStatistics = async () => {
-        try {
+    const query = useQuery({
+        queryKey: ["statistics"],
+        queryFn: async () => {
             const response = await PersonService.getStatistics();
-            setStatistics(response);
-        } catch (error) {
-            console.error("Error fetching statistics:", error);
-        }
-    };
-
-    useEffect(() => {
-        getStatistics();
-    }, []);
+            return response;
+        },
+    });
+    const { data: statistics, isPending, refetch } = query;
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await getStatistics();
+        await refetch();
         setRefreshing(false);
     };
+
+    if (isPending) {
+        return <ActivityIndicator size="large" color="#fea726" />;
+    }
 
     return (
         <SafeAreaView className="flex-1 px-4">

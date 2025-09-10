@@ -1,4 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Text, TextInput, ToastAndroid, View } from "react-native";
@@ -8,15 +9,14 @@ import { AddBtn } from "@/components/buttons";
 import { PersonService } from "@/services/personService";
 
 export default function AddDebt() {
+    const queryClient = useQueryClient();
     const [data, setData] = useState({
         name: "",
         amount: "",
     });
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleAddDebt = async () => {
-        setIsLoading(true);
-        try {
+    const mutationAddDebt = useMutation({
+        mutationFn: async () => {
             const newDebt = {
                 name: data.name,
                 totalAmount: parseFloat(data.amount),
@@ -24,16 +24,16 @@ export default function AddDebt() {
                 description: "",
                 status: "active",
             };
-            await PersonService.addPerson(newDebt).then(() => {
-                ToastAndroid.show("تمت إضافة الدين بنجاح", ToastAndroid.SHORT);
-                router.back();
-            });
-        } catch (error) {
-            console.error("Error adding debt:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            await PersonService.addPerson(newDebt);
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["debts"] });
+            await queryClient.invalidateQueries({ queryKey: ["statistics"] });
+            ToastAndroid.show("تمت إضافة الدين بنجاح", ToastAndroid.SHORT);
+            router.back();
+        },
+    });
+    const { mutate: handleAddDebt, isPending: isLoading } = mutationAddDebt;
 
     return (
         <SafeAreaView className="flex-1 px-4 relative">

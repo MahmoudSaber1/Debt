@@ -1,7 +1,8 @@
 import Entypo from "@expo/vector-icons/Entypo";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DebtCard } from "@/components/cards/debt-card";
@@ -9,42 +10,26 @@ import { PersonService } from "@/services/personService";
 
 export default function Debts() {
     const route = useRouter();
-    const [debts, setDebts] = useState<PersonProps[]>([]);
     const [refreshing, setRefreshing] = useState(false);
-    const [loading, setLoading] = useState(false);
 
-    const getDebts = async () => {
-        try {
+    const query = useQuery({
+        queryKey: ["debts"],
+        queryFn: async () => {
             const response = await PersonService.getAllPeople();
-            setDebts(response);
-        } catch (error) {
-            console.error("Error fetching debts:", error);
-        }
-    };
-
-    const handleDelete = async (id: number) => {
-        setLoading(true);
-        try {
-            await PersonService.deletePerson(id).then(async () => {
-                ToastAndroid.show("تم حذف الدين بنجاح", ToastAndroid.SHORT);
-                await getDebts();
-            });
-        } catch (error) {
-            console.error("Error deleting debt:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        getDebts();
-    }, []);
+            return response;
+        },
+    });
+    const { data: debts, isPending, refetch } = query;
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await getDebts();
+        await refetch();
         setRefreshing(false);
     };
+
+    if (isPending) {
+        return <ActivityIndicator size="large" color="#fea726" />;
+    }
 
     return (
         <SafeAreaView className="flex-1 px-4 relative">
@@ -58,8 +43,8 @@ export default function Debts() {
 
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <View className="flex-1 flex-col gap-4" style={{ direction: "rtl" }}>
-                    {debts.map((item) => (
-                        <DebtCard key={item.id} data={item} onDelete={handleDelete} loading={loading} />
+                    {debts.map((item: any) => (
+                        <DebtCard key={item.id} data={item} />
                     ))}
                 </View>
             </ScrollView>

@@ -1,92 +1,72 @@
 import * as LocalAuthentication from "expo-local-authentication";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { Alert, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CircleAnimation } from "@/components/circle-animation";
-import { useAuthStore } from "@/store";
+import { useAuth } from "@/lib/global-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 
 export default function Index() {
-    const { isAuthenticated, setBiometricType, setIsAuthenticated } = useAuthStore();
     const redirect = useRouter();
+    const { signIn, userToken, isLoading } = useAuth();
 
-    // فحص دعم البصمة على الجهاز
-    const checkBiometricSupport = useCallback(async () => {
+    const handleBiometricAuth = useCallback(async () => {
         try {
-            // التحقق من دعم الأجهزة للبصمة
+            // فحص الدعم
             const hasHardware = await LocalAuthentication.hasHardwareAsync();
             if (!hasHardware) {
                 Alert.alert("خطأ", "هذا الجهاز لا يدعم المصادقة البيومترية");
                 return;
             }
 
-            // التحقق من وجود بصمات مسجلة
             const isEnrolled = await LocalAuthentication.isEnrolledAsync();
             if (!isEnrolled) {
                 Alert.alert("تنبيه", "لا توجد بصمات مسجلة على هذا الجهاز");
                 return;
             }
 
-            // الحصول على أنواع المصادقة المتاحة
+            // تحديد نوع البصمة
             const availableTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+            let currentBiometricType = "البصمة";
 
             if (availableTypes.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-                setBiometricType("بصمة الإصبع");
+                currentBiometricType = "بصمة الإصبع";
             } else if (availableTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-                setBiometricType("التعرف على الوجه");
-            } else if (availableTypes.includes(LocalAuthentication.AuthenticationType.IRIS)) {
-                setBiometricType("مسح القزحية");
+                currentBiometricType = "التعرف على الوجه";
             }
-        } catch (error) {
-            console.error("خطأ في فحص دعم البصمة:", error);
-        }
-    }, [setBiometricType]);
 
-    // تشغيل مصادقة البصمة
-    const authenticateUser = useCallback(async () => {
-        try {
+            // بدء المصادقة
             const result = await LocalAuthentication.authenticateAsync({
-                promptMessage: "ضع إصبعك على مستشعر البصمة",
+                promptMessage: currentBiometricType === "بصمة الإصبع" ? "ضع إصبعك على مستشعر البصمة" : "ضع وجهك امام الكاميرا",
                 cancelLabel: "إلغاء",
                 fallbackLabel: "استخدم كلمة المرور",
-                disableDeviceFallback: false, // السماح بالعودة لكلمة مرور الجهاز
+                disableDeviceFallback: false,
             });
 
             if (result.success) {
-                setIsAuthenticated(true);
-                redirect.push("/(root)/(tabs)"); // إعادة التوجيه إلى الصفحة الرئيسية عند النجاح
+                signIn("isAuthenticated");
+                redirect.push("/(root)/(tabs)");
             } else {
-                setIsAuthenticated(false);
-
-                // التعامل مع أسباب الفشل المختلفة
-                if (result.error === "user_cancel") {
-                    Alert.alert("ملغي", "تم إلغاء المصادقة من قبل المستخدم");
-                } else if (result.error === "user_fallback") {
-                    Alert.alert("تنبيه", "تم اختيار كلمة المرور بدلاً من البصمة");
-                } else if (result.error === "not_available") {
-                    Alert.alert("خطأ", "المصادقة البيومترية غير متاحة");
-                } else if (result.error === "not_enrolled") {
-                    Alert.alert("خطأ", `لا توجد بصمات مسجلة على هذا الجهاز`);
-                } else {
-                    Alert.alert("خطأ", "فشل في التحقق من البصمة");
-                }
+                // handle errors...
             }
         } catch (error) {
             console.error("خطأ في المصادقة:", error);
-            Alert.alert("خطأ", "حدث خطأ غير متوقع");
         }
-    }, [setIsAuthenticated, redirect]);
+    }, [signIn, redirect]);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            redirect.push("/(root)/(tabs)"); // إعادة التوجيه إلى الصفحة الرئيسية إذا كان المستخدم مصادقًا بالفعل
-        } else {
-            checkBiometricSupport();
-            authenticateUser();
+        if (isLoading) {
+            return;
         }
-    }, [checkBiometricSupport, authenticateUser, isAuthenticated, redirect]);
+
+        if (userToken) {
+            redirect.push("/(root)/(tabs)");
+        } else {
+            handleBiometricAuth();
+        }
+    }, [handleBiometricAuth, userToken, redirect, isLoading]);
 
     return (
         <SafeAreaView className="h-full bg-white">

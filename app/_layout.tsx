@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 import DatabaseManager from "@/database/database";
+import { QueryProvider } from "@/lib/query-providers";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -29,5 +30,9 @@ export default function RootLayout() {
         return null;
     }
 
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return (
+        <QueryProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+        </QueryProvider>
+    );
 }

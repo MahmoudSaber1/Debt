@@ -1,7 +1,8 @@
 import Feather from "@expo/vector-icons/Feather";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Switch, Text, TextInput, ToastAndroid, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Switch, Text, TextInput, ToastAndroid, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AddBtn } from "@/components/buttons";
@@ -9,6 +10,8 @@ import { PersonService } from "@/services/personService";
 
 export default function EditDebt() {
     const { id } = useLocalSearchParams<{ id?: string }>();
+    const queryClient = useQueryClient();
+
     const [data, setData] = useState({
         name: "",
         amount: "",
@@ -16,25 +19,26 @@ export default function EditDebt() {
         totalAmount: "",
         status: "active",
     });
-    const [isLoading, setIsLoading] = useState(false);
 
-    const getDebtDetails = useCallback(async () => {
-        try {
+    const mutationGetDebt = useMutation({
+        mutationFn: async () => {
             const debt = await PersonService.getPersonById(parseInt(id!));
+            return debt;
+        },
+        onSuccess: async (response) => {
             setData({
-                name: debt.name,
-                remainingAmount: debt.remainingAmount.toString(),
-                totalAmount: debt.totalAmount.toString(),
+                name: response.name,
+                remainingAmount: response.remainingAmount.toString(),
+                totalAmount: response.totalAmount.toString(),
                 amount: "",
-                status: debt.status,
+                status: response.status,
             });
-        } catch (error) {
-            console.error("Error fetching debt details:", error);
-        }
-    }, [id]);
-    const handleEditDebt = async () => {
-        setIsLoading(true);
-        try {
+        },
+    });
+    const { isPending } = mutationGetDebt;
+
+    const mutationEditDebt = useMutation({
+        mutationFn: async () => {
             const updateTotal = parseFloat(data.totalAmount) + parseFloat(data.amount || "0");
             const updateRemaining = parseFloat(data.remainingAmount) + parseFloat(data.amount || "0");
 
@@ -45,20 +49,20 @@ export default function EditDebt() {
                 description: "",
                 status: data.status,
             };
-            await PersonService.updatePerson(parseInt(id!), newDebt).then(() => {
-                ToastAndroid.show("تمت تعديل الدين بنجاح", ToastAndroid.SHORT);
-                router.back();
-            });
-        } catch (error) {
-            console.error("Error adding debt:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            await PersonService.updatePerson(parseInt(id!), newDebt);
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["debts"] });
+            await queryClient.invalidateQueries({ queryKey: ["debt"] });
+            ToastAndroid.show("تمت تعديل الدين بنجاح", ToastAndroid.SHORT);
+            router.back();
+        },
+    });
+    const { mutate: handleEditDebt, isPending: isLoading } = mutationEditDebt;
 
-    useEffect(() => {
-        getDebtDetails();
-    }, [getDebtDetails]);
+    if (isPending) {
+        return <ActivityIndicator size="large" color="#fea726" />;
+    }
 
     return (
         <SafeAreaView className="flex-1 px-4 relative">
