@@ -1,13 +1,16 @@
+import Entypo from "@expo/vector-icons/Entypo";
 import { useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Widget, WidgetWithBarSpring } from "@/components/widget";
+import { useAuth } from "@/lib/global-context";
 import { PersonService } from "@/services/personService";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
+    const { signOut } = useAuth();
     const [refreshing, setRefreshing] = useState(false);
 
     const query = useQuery({
@@ -31,8 +34,10 @@ export default function Home() {
 
     return (
         <SafeAreaView className="flex-1 px-4">
-            <View className="fixed py-9 items-start justify-center flex-row">
+            <View className="fixed py-9 items-start justify-between flex-row">
+                <Text></Text>
                 <Text className="text-black-200 font-rubik-bold text-3xl">الأحصائيات</Text>
+                <Entypo name="log-out" size={30} color="#fea726" onPress={() => signOut()} />
             </View>
 
             <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 70 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>

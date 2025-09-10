@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AddBtn } from "@/components/buttons";
 import { PaymentService } from "@/services/paymentService";
+import { PersonService } from "@/services/personService";
 
 export default function AddPayment() {
     const { id } = useLocalSearchParams<{ id?: string }>();
@@ -19,6 +20,12 @@ export default function AddPayment() {
 
     const mutationAddPayment = useMutation({
         mutationFn: async () => {
+            const payments = await PersonService.getPersonById(parseInt(id!));
+            const isAmountBiggerThanRemaining = parseFloat(data.amount) > parseFloat(payments.remainingAmount);
+            if (isAmountBiggerThanRemaining) {
+                throw new Error(`المبلغ المدفوع يجب ان يكون اقل من المبلغ المتبقي ${payments.remainingAmount}`);
+            }
+
             const newDebt = {
                 personId: id ? parseInt(id) : 0,
                 amount: parseFloat(data.amount),
@@ -32,6 +39,9 @@ export default function AddPayment() {
             await queryClient.invalidateQueries({ queryKey: ["debt"] });
             ToastAndroid.show("تمت إضافة الدفعة بنجاح", ToastAndroid.SHORT);
             router.back();
+        },
+        onError: (error: any) => {
+            ToastAndroid.show(error.message, ToastAndroid.SHORT);
         },
     });
     const { mutate: handleAddPayment, isPending: isLoading } = mutationAddPayment;

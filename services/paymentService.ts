@@ -8,9 +8,12 @@ export class PaymentService {
         try {
             const result = await db.getAllAsync("SELECT * FROM payments WHERE person_id = ? ORDER BY payment_date DESC", [personId]);
             const formattedResult = result.map((payment: any) => ({
+                ...payment,
                 id: payment.id,
                 amount: payment.amount,
                 date: payment.payment_date,
+                remainingAmount: payment.remaining_amount,
+                personId: payment.person_id,
                 notes: payment.notes,
             }));
             return formattedResult;

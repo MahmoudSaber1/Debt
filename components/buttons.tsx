@@ -31,3 +31,11 @@ export const DeleteBtn = ({ onPress, loading }: { onPress: () => void; loading: 
         </TouchableOpacity>
     );
 };
+
+export const RetryBtn = ({ onPress }: { onPress: () => void }) => {
+    return (
+        <TouchableOpacity onPress={onPress} className="bg-primary-300 py-2 px-3 gap-2 rounded-md flex-row-reverse items-center justify-center">
+            <AntDesign name="reload1" size={20} color="white" />
+        </TouchableOpacity>
+    );
+};
